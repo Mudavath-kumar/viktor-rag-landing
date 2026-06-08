@@ -142,3 +142,34 @@
     color: var(--color-foreground);
   }
 }
+
+@keyframes fadeInUp {
+  0% { opacity: 0; transform: translateY(30px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in-up {
+  animation: fadeInUp 0.8s ease-out forwards;
+  opacity: 0;
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+}
+@media (max-width: 768px) {
+  .animate-marquee { animation-duration: 10s; }
+}
+
+html { scroll-behavior: smooth; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in-up { animation: none; opacity: 1; }
+}
+
+.font-mondwest {
+  font-family: 'PP Mondwest', Georgia, 'Times New Roman', serif;
+  font-style: italic;
+}
