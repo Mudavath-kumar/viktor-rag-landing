@@ -14,6 +14,7 @@ import { Route as SignupRouteImport } from './routes/signup'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as FeaturesRouteImport } from './routes/features'
+import { Route as DocsRouteImport } from './routes/docs'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as AnalyticsRouteImport } from './routes/analytics'
@@ -44,6 +45,11 @@ const FeaturesRoute = FeaturesRouteImport.update({
   path: '/features',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DocsRoute = DocsRouteImport.update({
+  id: '/docs',
+  path: '/docs',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -70,6 +76,7 @@ export interface FileRoutesByFullPath {
   '/analytics': typeof AnalyticsRoute
   '/chat': typeof ChatRoute
   '/dashboard': typeof DashboardRoute
+  '/docs': typeof DocsRoute
   '/features': typeof FeaturesRoute
   '/login': typeof LoginRoute
   '/pricing': typeof PricingRoute
@@ -81,6 +88,7 @@ export interface FileRoutesByTo {
   '/analytics': typeof AnalyticsRoute
   '/chat': typeof ChatRoute
   '/dashboard': typeof DashboardRoute
+  '/docs': typeof DocsRoute
   '/features': typeof FeaturesRoute
   '/login': typeof LoginRoute
   '/pricing': typeof PricingRoute
@@ -93,6 +101,7 @@ export interface FileRoutesById {
   '/analytics': typeof AnalyticsRoute
   '/chat': typeof ChatRoute
   '/dashboard': typeof DashboardRoute
+  '/docs': typeof DocsRoute
   '/features': typeof FeaturesRoute
   '/login': typeof LoginRoute
   '/pricing': typeof PricingRoute
@@ -106,6 +115,7 @@ export interface FileRouteTypes {
     | '/analytics'
     | '/chat'
     | '/dashboard'
+    | '/docs'
     | '/features'
     | '/login'
     | '/pricing'
@@ -117,6 +127,7 @@ export interface FileRouteTypes {
     | '/analytics'
     | '/chat'
     | '/dashboard'
+    | '/docs'
     | '/features'
     | '/login'
     | '/pricing'
@@ -128,6 +139,7 @@ export interface FileRouteTypes {
     | '/analytics'
     | '/chat'
     | '/dashboard'
+    | '/docs'
     | '/features'
     | '/login'
     | '/pricing'
@@ -140,6 +152,7 @@ export interface RootRouteChildren {
   AnalyticsRoute: typeof AnalyticsRoute
   ChatRoute: typeof ChatRoute
   DashboardRoute: typeof DashboardRoute
+  DocsRoute: typeof DocsRoute
   FeaturesRoute: typeof FeaturesRoute
   LoginRoute: typeof LoginRoute
   PricingRoute: typeof PricingRoute
@@ -184,6 +197,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FeaturesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/docs': {
+      id: '/docs'
+      path: '/docs'
+      fullPath: '/docs'
+      preLoaderRoute: typeof DocsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard': {
       id: '/dashboard'
       path: '/dashboard'
@@ -220,6 +240,7 @@ const rootRouteChildren: RootRouteChildren = {
   AnalyticsRoute: AnalyticsRoute,
   ChatRoute: ChatRoute,
   DashboardRoute: DashboardRoute,
+  DocsRoute: DocsRoute,
   FeaturesRoute: FeaturesRoute,
   LoginRoute: LoginRoute,
   PricingRoute: PricingRoute,
