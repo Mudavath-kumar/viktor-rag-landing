@@ -349,3 +349,227 @@ function CTASection() {
     </section>
   );
 }
+
+/* ---------- Logo marquee ---------- */
+function LogoMarquee() {
+  const logos = ["Stanford", "MIT", "OpenAI", "Anthropic", "BioTech Labs", "DataFlow", "Nexus", "Paradigm", "LaunchPad", "Nexgate"];
+  return (
+    <section className="py-10 border-y border-[#051A24]/10 bg-[#f0f0ee] overflow-hidden">
+      <p className="text-center text-xs font-mono uppercase tracking-[0.18em] text-[#273C46] mb-6">Trusted by research & engineering teams</p>
+      <div className="relative">
+        <div className="flex gap-16 animate-marquee whitespace-nowrap">
+          {[...logos, ...logos].map((l, i) => (
+            <span key={i} className="text-2xl font-medium text-[#051A24]/70 hover:text-[#051A24] transition-colors">{l}</span>
+          ))}
+        </div>
+        <div className="pointer-events-none absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-[#f0f0ee] to-transparent" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-[#f0f0ee] to-transparent" />
+      </div>
+    </section>
+  );
+}
+
+/* ---------- Stats band with animated counters ---------- */
+function StatsBand() {
+  const stats = [
+    { to: 12000, suffix: "+", label: "Teams onboarded" },
+    { to: 94, suffix: "%", label: "Hallucination reduction" },
+    { to: 340, suffix: "ms", label: "P95 retrieval latency" },
+    { to: 2400000, suffix: "+", label: "Documents indexed" },
+  ];
+  return (
+    <section className="py-20 md:py-28 px-6 max-w-[1200px] mx-auto">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-[#051A24]/10 rounded-3xl overflow-hidden">
+        {stats.map((s, i) => (
+          <Reveal key={s.label} delay={0.08 * i} variant="blur">
+            <div className="bg-[#f0f0ee] p-8 md:p-10 h-full">
+              <p className="font-mondwest text-[44px] md:text-[64px] leading-[1] text-[#051A24]">
+                <CountUp to={s.to} suffix={s.suffix} />
+              </p>
+              <p className="mt-3 text-sm text-[#273C46]">{s.label}</p>
+            </div>
+          </Reveal>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/* ---------- How it works — 3-step with animated arrows ---------- */
+function HowItWorks() {
+  const steps = [
+    { Icon: Upload, kicker: "01 · Ingest", title: "Drop in your sources", desc: "PDFs, scans, ZIP repos, spreadsheets — Viktor parses layout, OCR, and structure in one pass." },
+    { Icon: Cpu, kicker: "02 · Reason", title: "Agents do the work", desc: "Query planning, hybrid retrieval, cross-encoder re-ranking, and claim verification — all observable." },
+    { Icon: ShieldCheck, kicker: "03 · Trust", title: "Get cited answers", desc: "Every sentence links back to the exact page, cell, or line. Confidence scored, never guessed." },
+  ];
+  return (
+    <section className="py-20 md:py-28 px-6 bg-white">
+      <div className="max-w-[1200px] mx-auto">
+        <Reveal>
+          <SectionEyebrow>How it works</SectionEyebrow>
+          <h2 className="mt-3 text-[32px] md:text-[52px] leading-[1.02] tracking-tight max-w-2xl">
+            Three steps, <span className="font-mondwest text-[#1f5d4f]">zero</span> guessing.
+          </h2>
+        </Reveal>
+        <div className="mt-16 grid md:grid-cols-3 gap-6 md:gap-3 relative">
+          {steps.map((s, i) => (
+            <Reveal key={s.title} delay={0.12 * i} variant="up">
+              <div className="relative bg-[#f7f7f5] rounded-3xl p-8 h-full border border-[#051A24]/5 smooth-hover hover:-translate-y-1 hover:shadow-[0_30px_60px_-30px_rgba(5,26,36,0.18)]">
+                <div className="absolute -top-4 -left-4 w-10 h-10 rounded-full bg-[#1f5d4f] grid place-items-center">
+                  <span className="absolute inset-0 rounded-full bg-[#1f5d4f] animate-pulse-ring" />
+                  <s.Icon className="w-4 h-4 text-white relative" />
+                </div>
+                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#1f5d4f]">{s.kicker}</p>
+                <h3 className="mt-6 font-mondwest text-3xl">{s.title}</h3>
+                <p className="mt-3 text-sm text-[#273C46] leading-relaxed">{s.desc}</p>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ---------- Live demo preview (mock chat with streaming citations) ---------- */
+function LiveDemo() {
+  const lines = [
+    "Decomposed query into 3 sub-questions",
+    "Retrieved 247 chunks · BM25 + dense",
+    "Re-ranked to top 8 · cross-encoder",
+    "Verified 8/8 claims · 0.94 confidence",
+    "Ready · 12 inline citations",
+  ];
+  const [step, setStep] = useState(0);
+  const { ref, isVisible } = useInViewAnimation();
+  useEffect(() => {
+    if (!isVisible) return;
+    setStep(0);
+    const id = setInterval(() => setStep((s) => (s < lines.length ? s + 1 : s)), 600);
+    return () => clearInterval(id);
+  }, [isVisible, lines.length]);
+
+  return (
+    <section ref={ref} className="py-20 md:py-28 px-6">
+      <div className="max-w-[1200px] mx-auto grid md:grid-cols-2 gap-10 items-center">
+        <Reveal variant="left">
+          <SectionEyebrow>Live pipeline</SectionEyebrow>
+          <h2 className="mt-3 text-[32px] md:text-[52px] leading-[1.02] tracking-tight">
+            Watch every <span className="font-mondwest text-[#1f5d4f]">decision</span>.
+          </h2>
+          <p className="mt-6 text-[#273C46] max-w-md">
+            Viktor surfaces every retrieval, every score, every verification step. No black box — just trace lines you can audit.
+          </p>
+          <div className="mt-8 flex gap-3">
+            <Link to="/chat"><PrimaryBtn className="inline-flex items-center gap-2"><PlayCircle className="w-4 h-4" /> Try it now</PrimaryBtn></Link>
+            <Link to="/docs"><SecondaryBtn>How it traces</SecondaryBtn></Link>
+          </div>
+        </Reveal>
+
+        <Reveal variant="right" delay={0.1}>
+          <div className="relative">
+            <div className="absolute -inset-4 bg-gradient-to-br from-[#1f5d4f]/20 via-[#5cc9b1]/10 to-transparent rounded-[36px] blur-2xl animate-gradient" />
+            <div className="relative bg-[#051A24] rounded-[28px] p-7 text-white shadow-[0_40px_80px_-30px_rgba(5,26,36,0.5)]">
+              <div className="flex items-center gap-2 pb-4 border-b border-white/10">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#ff6b6b]" />
+                <span className="w-2.5 h-2.5 rounded-full bg-[#fab005]" />
+                <span className="w-2.5 h-2.5 rounded-full bg-[#5cc9b1]" />
+                <span className="ml-3 text-[11px] font-mono text-white/50">viktor · trace</span>
+              </div>
+              <div className="mt-5 text-sm font-mono space-y-2.5 min-h-[210px]">
+                {lines.map((l, i) => (
+                  <div key={i} className={`flex items-start gap-3 transition-all duration-500 ${i < step ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2"}`}>
+                    <span className="text-[#5cc9b1] mt-0.5">{i < step - 1 ? "✓" : "›"}</span>
+                    <span className={`${i === step - 1 ? "text-white" : "text-white/60"}`}>{l}</span>
+                    {i === step - 1 && i < lines.length - 1 && (
+                      <span className="ml-auto inline-block w-1.5 h-4 bg-[#5cc9b1] animate-pulse" />
+                    )}
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 pt-4 border-t border-white/10 grid grid-cols-3 gap-3 text-center">
+                <div><p className="font-mondwest text-2xl text-[#5cc9b1]">8/8</p><p className="text-[10px] text-white/50 mt-1">verified</p></div>
+                <div><p className="font-mondwest text-2xl">0.94</p><p className="text-[10px] text-white/50 mt-1">confidence</p></div>
+                <div><p className="font-mondwest text-2xl">340ms</p><p className="text-[10px] text-white/50 mt-1">latency</p></div>
+              </div>
+            </div>
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+/* ---------- Integrations ---------- */
+function Integrations() {
+  const items = [
+    { Icon: Github, name: "GitHub" },
+    { Icon: Slack, name: "Slack" },
+    { Icon: Database, name: "Postgres" },
+    { Icon: Box, name: "Notion" },
+    { Icon: Globe, name: "Webhooks" },
+    { Icon: GitBranch, name: "Linear" },
+    { Icon: Layers, name: "S3" },
+    { Icon: Network, name: "Zapier" },
+  ];
+  return (
+    <section className="py-20 md:py-28 px-6 bg-white">
+      <div className="max-w-[1200px] mx-auto grid md:grid-cols-5 gap-10 items-center">
+        <div className="md:col-span-2">
+          <Reveal variant="left">
+            <SectionEyebrow>Integrations</SectionEyebrow>
+            <h2 className="mt-3 text-[32px] md:text-[48px] leading-[1.02] tracking-tight">
+              Plays well with <span className="font-mondwest text-[#1f5d4f]">your stack</span>.
+            </h2>
+            <p className="mt-5 text-[#273C46]">Connect the tools your team already uses — Viktor syncs, indexes, and verifies in the background.</p>
+            <Link to="/docs" className="mt-6 inline-flex items-center gap-1 text-sm text-[#1f5d4f] font-medium">See all integrations <ArrowUpRight className="w-3.5 h-3.5" /></Link>
+          </Reveal>
+        </div>
+        <div className="md:col-span-3 grid grid-cols-4 gap-px bg-[#051A24]/10 rounded-3xl overflow-hidden">
+          {items.map((it, i) => (
+            <Reveal key={it.name} delay={0.04 * i} variant="scale">
+              <div className="bg-white aspect-square flex flex-col items-center justify-center gap-2 smooth-hover hover:bg-[#f7f7f5] cursor-pointer group">
+                <it.Icon className="w-7 h-7 text-[#051A24] group-hover:text-[#1f5d4f] group-hover:scale-110 transition-all duration-500" />
+                <span className="text-[11px] text-[#273C46]">{it.name}</span>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ---------- FAQ ---------- */
+function FAQ() {
+  const faqs = [
+    ["How is Viktor different from a regular RAG wrapper?", "Most RAG wrappers retrieve and generate. Viktor adds query planning, hybrid retrieval with re-ranking, claim-level verification, and per-answer confidence scoring — every step is observable."],
+    ["What formats do you support?", "PDFs, DOCX, scanned images, photos, ZIP code repos, spreadsheets, audio transcripts, and HTML pages. Layout, tables, equations, and figures are preserved."],
+    ["Can I use my own LLM?", "Yes. We default to GPT-4o-class models and support Claude, Gemini, and open-weight models on Team and Enterprise plans."],
+    ["Is my data used to train models?", "Never. Your data is yours. Per-workspace isolation, encryption at rest, audit logs on every query."],
+    ["How accurate are the citations?", "Quote-level alignment between answers and source chunks — citations point to the exact page, paragraph, cell, or line."],
+  ];
+  return (
+    <section className="py-20 md:py-28 px-6 max-w-[1100px] mx-auto">
+      <Reveal>
+        <SectionEyebrow>Questions</SectionEyebrow>
+        <h2 className="mt-3 text-[32px] md:text-[52px] leading-[1.02] tracking-tight">
+          Asked, <span className="font-mondwest text-[#1f5d4f]">answered</span>.
+        </h2>
+      </Reveal>
+      <div className="mt-12 divide-y divide-[#051A24]/10 border-y border-[#051A24]/10">
+        {faqs.map(([q, a], i) => (
+          <Reveal key={q} delay={0.05 * i}>
+            <details className="group py-6 cursor-pointer">
+              <summary className="flex justify-between items-center list-none gap-6">
+                <span className="font-medium text-lg md:text-xl">{q}</span>
+                <span className="text-2xl text-[#1f5d4f] transition-transform duration-500 group-open:rotate-45 shrink-0">+</span>
+              </summary>
+              <p className="mt-4 text-[#273C46] max-w-2xl leading-relaxed">{a}</p>
+            </details>
+          </Reveal>
+        ))}
+      </div>
+    </section>
+  );
+}
