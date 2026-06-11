@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UploadRouteImport } from './routes/upload'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as AnalyticsRouteImport } from './routes/analytics'
@@ -18,6 +19,11 @@ import { Route as IndexRouteImport } from './routes/index'
 const UploadRoute = UploadRouteImport.update({
   id: '/upload',
   path: '/upload',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -46,6 +52,7 @@ export interface FileRoutesByFullPath {
   '/analytics': typeof AnalyticsRoute
   '/chat': typeof ChatRoute
   '/dashboard': typeof DashboardRoute
+  '/login': typeof LoginRoute
   '/upload': typeof UploadRoute
 }
 export interface FileRoutesByTo {
@@ -53,6 +60,7 @@ export interface FileRoutesByTo {
   '/analytics': typeof AnalyticsRoute
   '/chat': typeof ChatRoute
   '/dashboard': typeof DashboardRoute
+  '/login': typeof LoginRoute
   '/upload': typeof UploadRoute
 }
 export interface FileRoutesById {
@@ -61,14 +69,22 @@ export interface FileRoutesById {
   '/analytics': typeof AnalyticsRoute
   '/chat': typeof ChatRoute
   '/dashboard': typeof DashboardRoute
+  '/login': typeof LoginRoute
   '/upload': typeof UploadRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/analytics' | '/chat' | '/dashboard' | '/upload'
+  fullPaths: '/' | '/analytics' | '/chat' | '/dashboard' | '/login' | '/upload'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/analytics' | '/chat' | '/dashboard' | '/upload'
-  id: '__root__' | '/' | '/analytics' | '/chat' | '/dashboard' | '/upload'
+  to: '/' | '/analytics' | '/chat' | '/dashboard' | '/login' | '/upload'
+  id:
+    | '__root__'
+    | '/'
+    | '/analytics'
+    | '/chat'
+    | '/dashboard'
+    | '/login'
+    | '/upload'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -76,6 +92,7 @@ export interface RootRouteChildren {
   AnalyticsRoute: typeof AnalyticsRoute
   ChatRoute: typeof ChatRoute
   DashboardRoute: typeof DashboardRoute
+  LoginRoute: typeof LoginRoute
   UploadRoute: typeof UploadRoute
 }
 
@@ -86,6 +103,13 @@ declare module '@tanstack/react-router' {
       path: '/upload'
       fullPath: '/upload'
       preLoaderRoute: typeof UploadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -124,6 +148,7 @@ const rootRouteChildren: RootRouteChildren = {
   AnalyticsRoute: AnalyticsRoute,
   ChatRoute: ChatRoute,
   DashboardRoute: DashboardRoute,
+  LoginRoute: LoginRoute,
   UploadRoute: UploadRoute,
 }
 export const routeTree = rootRouteImport
