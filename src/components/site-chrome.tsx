@@ -61,7 +61,8 @@ export function Navbar() {
             {l.label}
           </Link>
         ))}
-        <PrimaryBtn className="!text-[12px] !px-5 !py-2">Get Started</PrimaryBtn>
+        <Link to="/login" className="text-[12px] sm:text-[14px] font-medium text-gray-700 hover:text-gray-900">Sign in</Link>
+        <Link to="/signup"><PrimaryBtn className="!text-[12px] !px-5 !py-2">Get Started</PrimaryBtn></Link>
       </nav>
       <button onClick={() => setOpen(true)} className="md:hidden flex items-center justify-center rounded-full w-10 h-10 shrink-0" style={{ backgroundColor: "#EDEDED" }} aria-label="Menu">
         <Menu className="w-5 h-5 text-[#051A24]" />
