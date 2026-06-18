@@ -1,4 +1,4 @@
-# Viktor RAG 🤖📄
+# Viktor RAG 🤖📄 
 
 > **AI-powered document Q&A platform** — Upload your PDFs, DOCX, and text files, then chat with them using semantic search and a free LLM.
 
