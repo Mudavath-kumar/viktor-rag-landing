@@ -40,7 +40,7 @@ type Item = {
   name: string;
   size: string;
   type: string;
-  status: "queued" | "uploading" | "done" | "error";
+  status: "queued" | "uploading" | "processing" | "done" | "error";
   tags?: string[];
   category?: string;
 };
@@ -66,7 +66,20 @@ function UploadPage() {
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (user) loadDocuments();
+    if (!user) return;
+    loadDocuments();
+
+    const interval = setInterval(async () => {
+      setItems((currentItems) => {
+        const hasProcessing = currentItems.some((it) => it.status === "processing");
+        if (hasProcessing) {
+          loadDocuments();
+        }
+        return currentItems;
+      });
+    }, 3000);
+
+    return () => clearInterval(interval);
   }, [user]);
 
   const loadDocuments = async () => {
@@ -104,10 +117,10 @@ function UploadPage() {
         const { document } = await api.upload(user.id, file);
         setItems((p) =>
           p.map((it) =>
-            it.id === tempId ? { ...it, id: document.id, status: "done" } : it
+            it.id === tempId ? { ...it, id: document.id, status: "processing" } : it
           )
         );
-        toast.success(`${file.name} uploaded & indexed`);
+        toast.success(`${file.name} uploaded successfully! Indexing in background...`);
       } catch (e: any) {
         setItems((p) =>
           p.map((it) =>
@@ -366,6 +379,12 @@ function UploadPage() {
                         )}
                         {it.status === "uploading" && (
                           <Loader2 className="w-4 h-4 text-amber-600 animate-spin" />
+                        )}
+                        {it.status === "processing" && (
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <Loader2 className="w-4 h-4 text-amber-600 animate-spin" />
+                            <span className="text-[10px] font-mono text-amber-600 font-medium">INDEXING</span>
+                          </div>
                         )}
                         {it.status === "error" && (
                           <>

@@ -3,7 +3,7 @@ import tempfile
 import httpx
 import uvicorn
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, UploadFile, File, Form
+from fastapi import FastAPI, UploadFile, File, Form, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import traceback
@@ -81,8 +81,22 @@ async def login(req: LoginRequest):
 
 # ─── Upload ─────────────────────────────────────────────────────────────────
 
+def background_process_file(doc_id: str, file_bytes: bytes, name: str, user_id: str):
+    try:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=name) as tmp:
+            tmp.write(file_bytes)
+            tmp_path = tmp.name
+        text = extract_text(tmp_path)
+        os.unlink(tmp_path)
+        process_document(doc_id, text, user_id)
+    except Exception as e:
+        traceback.print_exc()
+        store.update_document_status(user_id, doc_id, "error")
+
+
 @app.post("/api/upload")
 async def upload_file(
+    background_tasks: BackgroundTasks,
     user_id: str = Form(...),
     name: str = Form(...),
     size: str = Form(...),
@@ -112,18 +126,8 @@ async def upload_file(
             "created_at": __import__("datetime").datetime.utcnow().isoformat(),
         })
 
-        # Extract text and process
-        try:
-            with tempfile.NamedTemporaryFile(delete=False, suffix=name) as tmp:
-                tmp.write(file_bytes)
-                tmp_path = tmp.name
-            text = extract_text(tmp_path)
-            os.unlink(tmp_path)
-            process_document(doc["id"], text, user_id)
-        except Exception as e:
-            store.update_document_status(user_id, doc["id"], "error")
-            return JSONResponse(status_code=500, content={"error": str(e), "document": doc},
-                                headers={"Access-Control-Allow-Origin": "*"})
+        # Extract text and process in the background
+        background_tasks.add_task(background_process_file, doc["id"], file_bytes, name, user_id)
 
         return {"document": doc}
     except Exception as e:
