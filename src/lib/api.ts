@@ -32,17 +32,19 @@ export const api = {
     return res.json();
   },
 
-  getDocuments: (userId: string) =>
-    request<{ documents: any[] }>(`/documents/${userId}`),
+  getDocuments: (userId: string) => request<{ documents: any[] }>(`/documents/${userId}`),
 
   createSession: (userId: string, documentId?: string, documentName?: string) =>
     request<{ session: any }>("/chat/sessions", {
       method: "POST",
-      body: JSON.stringify({ user_id: userId, document_id: documentId, document_name: documentName }),
+      body: JSON.stringify({
+        user_id: userId,
+        document_id: documentId,
+        document_name: documentName,
+      }),
     }),
 
-  getSessions: (userId: string) =>
-    request<{ sessions: any[] }>(`/chat/sessions/${userId}`),
+  getSessions: (userId: string) => request<{ sessions: any[] }>(`/chat/sessions/${userId}`),
 
   sendMessage: (sessionId: string, userId: string, content: string) =>
     request<{ message: any }>("/chat/send", {
@@ -50,16 +52,18 @@ export const api = {
       body: JSON.stringify({ session_id: sessionId, user_id: userId, content }),
     }),
 
-  getMessages: (sessionId: string) =>
-    request<{ messages: any[] }>(`/chat/messages/${sessionId}`),
+  getMessages: (sessionId: string) => request<{ messages: any[] }>(`/chat/messages/${sessionId}`),
 
   deleteSession: (sessionId: string, userId: string) =>
-    request<{ success: boolean }>(`/chat/sessions/${sessionId}?user_id=${encodeURIComponent(userId)}`, { method: "DELETE" }),
+    request<{ success: boolean }>(
+      `/chat/sessions/${sessionId}?user_id=${encodeURIComponent(userId)}`,
+      { method: "DELETE" },
+    ),
 
   renameSession: (sessionId: string, userId: string, title: string) =>
     request<{ success: boolean }>(
       `/chat/sessions/${sessionId}/rename?user_id=${encodeURIComponent(userId)}&title=${encodeURIComponent(title)}`,
-      { method: "PUT" }
+      { method: "PUT" },
     ),
 
   deleteDocument: (userId: string, docId: string) =>
@@ -73,10 +77,15 @@ export const api = {
   // ─── AI Features ───────────────────────────────────────────────────
 
   summarize: (userId: string, docId: string) =>
-    request<{ doc_id: string; summary: string; key_points: string[]; topics: string[]; tldr: string; tags?: string[]; category?: string }>(
-      `/documents/${docId}/summarize?user_id=${encodeURIComponent(userId)}`,
-      { method: "POST" },
-    ),
+    request<{
+      doc_id: string;
+      summary: string;
+      key_points: string[];
+      topics: string[];
+      tldr: string;
+      tags?: string[];
+      category?: string;
+    }>(`/documents/${docId}/summarize?user_id=${encodeURIComponent(userId)}`, { method: "POST" }),
 
   getSummary: (docId: string) =>
     request<{ summary: string; key_points: string[]; topics: string[]; tldr: string }>(
@@ -90,9 +99,7 @@ export const api = {
     ),
 
   getQuiz: (docId: string) =>
-    request<{ doc_id: string; questions: any[] }>(
-      `/documents/${docId}/quiz`,
-    ),
+    request<{ doc_id: string; questions: any[] }>(`/documents/${docId}/quiz`),
 
   generateTags: (userId: string, docId: string) =>
     request<{ doc_id: string; tags: string[]; category: string }>(
@@ -101,13 +108,18 @@ export const api = {
     ),
 
   generateInsights: (userId: string) =>
-    request<{ key_topics: string[]; knowledge_gaps: string[]; connections: any[]; briefing: string }>(
-      `/insights/${userId}`,
-      { method: "POST" },
-    ),
+    request<{
+      key_topics: string[];
+      knowledge_gaps: string[];
+      connections: any[];
+      briefing: string;
+    }>(`/insights/${userId}`, { method: "POST" }),
 
   getInsights: (userId: string) =>
-    request<{ key_topics: string[]; knowledge_gaps: string[]; connections: any[]; briefing: string }>(
-      `/insights/${userId}`,
-    ),
+    request<{
+      key_topics: string[];
+      knowledge_gaps: string[];
+      connections: any[];
+      briefing: string;
+    }>(`/insights/${userId}`),
 };

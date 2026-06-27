@@ -1,7 +1,16 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { PageShell, SectionEyebrow } from "@/components/site-chrome";
-import { LogOut, User, Mail, FileText, MessageSquare, BarChart2, Trash2, Shield } from "lucide-react";
+import {
+  LogOut,
+  User,
+  Mail,
+  FileText,
+  MessageSquare,
+  BarChart2,
+  Trash2,
+  Shield,
+} from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
@@ -17,7 +26,7 @@ export const Route = createFileRoute("/profile")({
 });
 
 function ProfilePage() {
-  const { user, signOut } = useAuth();
+  const { user, signOut, loading } = useAuth();
   const navigate = useNavigate();
   const [stats, setStats] = useState({ documents: 0, queries: 0, sessions: 0 });
   const [documents, setDocuments] = useState<any[]>([]);
@@ -30,10 +39,7 @@ function ProfilePage() {
 
   const loadData = async () => {
     if (!user) return;
-    const [dash, docs] = await Promise.all([
-      api.getDashboard(user.id),
-      api.getDocuments(user.id),
-    ]);
+    const [dash, docs] = await Promise.all([api.getDashboard(user.id), api.getDocuments(user.id)]);
     setStats({ documents: dash.documents, queries: dash.queries, sessions: dash.sessions });
     setDocuments(docs.documents ?? []);
   };
@@ -57,8 +63,23 @@ function ProfilePage() {
     setDeletingId(null);
   };
 
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate({ to: "/login" });
+    }
+  }, [user, loading, navigate]);
+
+  if (loading) {
+    return (
+      <PageShell>
+        <div className="flex h-[70vh] items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1f5d4f]"></div>
+        </div>
+      </PageShell>
+    );
+  }
+
   if (!user) {
-    navigate({ to: "/login" });
     return null;
   }
 
@@ -84,7 +105,8 @@ function ProfilePage() {
                 <Mail className="w-3.5 h-3.5 shrink-0" /> {user.email}
               </p>
               <p className="mt-2 text-xs text-[#273C46]/50 flex items-center justify-center gap-1">
-                <User className="w-3 h-3" /> User ID: <span className="font-mono">{user.id?.slice(0, 8)}…</span>
+                <User className="w-3 h-3" /> User ID:{" "}
+                <span className="font-mono">{user.id?.slice(0, 8)}…</span>
               </p>
               <button
                 onClick={handleLogout}
@@ -96,7 +118,9 @@ function ProfilePage() {
 
             {/* Stats */}
             <div className="bg-white rounded-3xl p-6 border border-[#051A24]/5">
-              <p className="text-xs uppercase tracking-wide text-[#273C46] font-semibold mb-4">Account Stats</p>
+              <p className="text-xs uppercase tracking-wide text-[#273C46] font-semibold mb-4">
+                Account Stats
+              </p>
               <div className="space-y-3">
                 {[
                   { Icon: FileText, label: "Documents", value: stats.documents },
@@ -119,7 +143,9 @@ function ProfilePage() {
                 <Shield className="w-4 h-4 text-[#1f5d4f]" />
                 <p className="text-sm font-semibold">Free Plan</p>
               </div>
-              <p className="text-xs text-white/50">Powered by Groq + local embeddings. No usage limits on indexing.</p>
+              <p className="text-xs text-white/50">
+                Powered by Groq + local embeddings. No usage limits on indexing.
+              </p>
               <Link
                 to="/pricing"
                 className="mt-4 inline-block text-xs text-[#1f5d4f] hover:underline"
@@ -133,11 +159,10 @@ function ProfilePage() {
           <div className="lg:col-span-8">
             <div className="bg-white rounded-3xl p-6 border border-[#051A24]/5">
               <div className="flex items-center justify-between mb-5">
-                <p className="text-xs uppercase tracking-wide text-[#273C46] font-semibold">My Documents</p>
-                <Link
-                  to="/upload"
-                  className="text-xs text-[#1f5d4f] hover:underline"
-                >
+                <p className="text-xs uppercase tracking-wide text-[#273C46] font-semibold">
+                  My Documents
+                </p>
+                <Link to="/upload" className="text-xs text-[#1f5d4f] hover:underline">
                   + Upload new
                 </Link>
               </div>
@@ -146,7 +171,10 @@ function ProfilePage() {
                 <div className="text-center py-16">
                   <FileText className="w-10 h-10 text-[#273C46]/20 mx-auto mb-3" />
                   <p className="text-sm text-[#273C46]/60">No documents yet.</p>
-                  <Link to="/upload" className="mt-3 inline-block text-sm text-[#1f5d4f] hover:underline">
+                  <Link
+                    to="/upload"
+                    className="mt-3 inline-block text-sm text-[#1f5d4f] hover:underline"
+                  >
                     Upload your first document →
                   </Link>
                 </div>
@@ -162,10 +190,14 @@ function ProfilePage() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium truncate text-[#051A24]">{doc.name}</p>
-                        <p className="text-xs text-[#273C46]/60">{doc.size} · {new Date(doc.created_at).toLocaleDateString()}</p>
+                        <p className="text-xs text-[#273C46]/60">
+                          {doc.size} · {new Date(doc.created_at).toLocaleDateString()}
+                        </p>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${doc.status === "done" ? "bg-[#1f5d4f]/10 text-[#1f5d4f]" : doc.status === "error" ? "bg-red-50 text-red-500" : "bg-amber-50 text-amber-600"}`}>
+                        <span
+                          className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${doc.status === "done" ? "bg-[#1f5d4f]/10 text-[#1f5d4f]" : doc.status === "error" ? "bg-red-50 text-red-500" : "bg-amber-50 text-amber-600"}`}
+                        >
                           {doc.status}
                         </span>
                         {doc.status === "done" && (

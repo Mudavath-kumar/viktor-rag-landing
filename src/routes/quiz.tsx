@@ -1,7 +1,16 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { PageShell, SectionEyebrow, PrimaryBtn, SecondaryBtn } from "@/components/site-chrome";
-import { Brain, CheckCircle2, XCircle, Loader2, ArrowRight, RotateCcw, Trophy, Sparkles } from "lucide-react";
+import {
+  Brain,
+  CheckCircle2,
+  XCircle,
+  Loader2,
+  ArrowRight,
+  RotateCcw,
+  Trophy,
+  Sparkles,
+} from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
@@ -28,7 +37,7 @@ type Question = {
 };
 
 function QuizPage() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { docId, docName } = Route.useSearch();
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -108,8 +117,23 @@ function QuizPage() {
     }
   };
 
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate({ to: "/login" });
+    }
+  }, [user, authLoading, navigate]);
+
+  if (authLoading) {
+    return (
+      <PageShell>
+        <div className="flex h-[70vh] items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1f5d4f]"></div>
+        </div>
+      </PageShell>
+    );
+  }
+
   if (!user) {
-    navigate({ to: "/login" });
     return null;
   }
 
@@ -119,7 +143,9 @@ function QuizPage() {
         <section className="px-6 max-w-[800px] mx-auto pb-24 text-center pt-20">
           <Brain className="w-16 h-16 text-[#1f5d4f] mx-auto mb-6" />
           <h1 className="text-3xl font-medium">No document selected</h1>
-          <p className="text-[#273C46] mt-3">Go to Upload page and click the quiz button on a document.</p>
+          <p className="text-[#273C46] mt-3">
+            Go to Upload page and click the quiz button on a document.
+          </p>
           <div className="mt-8">
             <button onClick={() => navigate({ to: "/upload" })}>
               <PrimaryBtn>Go to Upload</PrimaryBtn>
@@ -156,7 +182,9 @@ function QuizPage() {
         {!loading && questions.length === 0 && (
           <div className="mt-16 text-center">
             <Brain className="w-16 h-16 text-[#273C46]/30 mx-auto mb-4" />
-            <p className="text-[#273C46]">No quiz questions could be generated for this document.</p>
+            <p className="text-[#273C46]">
+              No quiz questions could be generated for this document.
+            </p>
             <button onClick={regenerateQuiz} className="mt-4">
               <PrimaryBtn>Try Again</PrimaryBtn>
             </button>
@@ -170,7 +198,9 @@ function QuizPage() {
               <div className="flex-1 h-2 bg-[#051A24]/10 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-gradient-to-r from-[#1f5d4f] to-[#5cc9b1] rounded-full transition-all duration-500"
-                  style={{ width: `${((currentQ + (answered ? 1 : 0)) / questions.length) * 100}%` }}
+                  style={{
+                    width: `${((currentQ + (answered ? 1 : 0)) / questions.length) * 100}%`,
+                  }}
                 />
               </div>
               <span className="text-xs font-mono text-[#273C46] shrink-0">
@@ -265,16 +295,23 @@ function QuizPage() {
               {answered && (
                 <div className="border-t border-[#051A24]/5 px-8 py-4 flex items-center justify-between bg-[#f0f0ee]/30">
                   <p className="text-sm text-[#273C46]">
-                    Score: <span className="font-medium text-[#1f5d4f]">{score}/{currentQ + 1}</span>
+                    Score:{" "}
+                    <span className="font-medium text-[#1f5d4f]">
+                      {score}/{currentQ + 1}
+                    </span>
                   </p>
                   <button
                     onClick={nextQuestion}
                     className="flex items-center gap-2 bg-[#051A24] text-white rounded-full px-5 py-2.5 text-sm font-medium hover:bg-[#0D212C] transition"
                   >
                     {currentQ < questions.length - 1 ? (
-                      <>Next <ArrowRight className="w-4 h-4" /></>
+                      <>
+                        Next <ArrowRight className="w-4 h-4" />
+                      </>
                     ) : (
-                      <>See Results <Trophy className="w-4 h-4" /></>
+                      <>
+                        See Results <Trophy className="w-4 h-4" />
+                      </>
                     )}
                   </button>
                 </div>
@@ -289,14 +326,33 @@ function QuizPage() {
             <div className="bg-white rounded-[28px] border border-[#051A24]/5 shadow-[0_20px_40px_-20px_rgba(5,26,36,0.12)] p-10 md:p-14 text-center">
               {/* Celebration */}
               <div className="relative inline-block mb-6">
-                <div className={`w-28 h-28 rounded-full flex items-center justify-center ${pct >= 80 ? "bg-emerald-100" : pct >= 50 ? "bg-amber-100" : "bg-red-100"}`}>
-                  <Trophy className={`w-12 h-12 ${pct >= 80 ? "text-emerald-600" : pct >= 50 ? "text-amber-600" : "text-red-600"}`} />
+                <div
+                  className={`w-28 h-28 rounded-full flex items-center justify-center ${pct >= 80 ? "bg-emerald-100" : pct >= 50 ? "bg-amber-100" : "bg-red-100"}`}
+                >
+                  <Trophy
+                    className={`w-12 h-12 ${pct >= 80 ? "text-emerald-600" : pct >= 50 ? "text-amber-600" : "text-red-600"}`}
+                  />
                 </div>
                 {pct >= 80 && (
                   <>
-                    <span className="absolute -top-2 -left-2 text-2xl animate-bounce" style={{ animationDelay: "0ms" }}>🎉</span>
-                    <span className="absolute -top-2 -right-2 text-2xl animate-bounce" style={{ animationDelay: "200ms" }}>⭐</span>
-                    <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 text-2xl animate-bounce" style={{ animationDelay: "400ms" }}>🏆</span>
+                    <span
+                      className="absolute -top-2 -left-2 text-2xl animate-bounce"
+                      style={{ animationDelay: "0ms" }}
+                    >
+                      🎉
+                    </span>
+                    <span
+                      className="absolute -top-2 -right-2 text-2xl animate-bounce"
+                      style={{ animationDelay: "200ms" }}
+                    >
+                      ⭐
+                    </span>
+                    <span
+                      className="absolute -bottom-2 left-1/2 -translate-x-1/2 text-2xl animate-bounce"
+                      style={{ animationDelay: "400ms" }}
+                    >
+                      🏆
+                    </span>
                   </>
                 )}
               </div>
@@ -313,11 +369,23 @@ function QuizPage() {
               <div className="mt-8 mb-8">
                 <div className="relative w-36 h-36 mx-auto">
                   <svg viewBox="0 0 120 120" className="w-full h-full -rotate-90">
-                    <circle cx="60" cy="60" r="50" fill="none" stroke="#051A24" strokeOpacity="0.08" strokeWidth="10" />
                     <circle
-                      cx="60" cy="60" r="50" fill="none"
+                      cx="60"
+                      cy="60"
+                      r="50"
+                      fill="none"
+                      stroke="#051A24"
+                      strokeOpacity="0.08"
+                      strokeWidth="10"
+                    />
+                    <circle
+                      cx="60"
+                      cy="60"
+                      r="50"
+                      fill="none"
                       stroke={pct >= 80 ? "#10b981" : pct >= 50 ? "#f59e0b" : "#ef4444"}
-                      strokeWidth="10" strokeLinecap="round"
+                      strokeWidth="10"
+                      strokeLinecap="round"
                       strokeDasharray={`${(pct / 100) * 314} 314`}
                       className="transition-all duration-1000"
                     />

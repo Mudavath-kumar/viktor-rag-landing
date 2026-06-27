@@ -1,7 +1,23 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { PageShell } from "@/components/site-chrome";
-import { Send, Plus, Trash2, MessageSquare, Sparkles, Search, Pencil, Check, X, Download, Mic, MicOff, Volume2, VolumeX, Brain } from "lucide-react";
+import {
+  Send,
+  Plus,
+  Trash2,
+  MessageSquare,
+  Sparkles,
+  Search,
+  Pencil,
+  Check,
+  X,
+  Download,
+  Mic,
+  MicOff,
+  Volume2,
+  VolumeX,
+  Brain,
+} from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
@@ -17,10 +33,16 @@ export const Route = createFileRoute("/chat")({
 });
 
 type Msg = { id: string; role: "user" | "assistant"; content: string; created_at: string };
-type Session = { id: string; title: string; created_at: string; document_id?: string; document_name?: string };
+type Session = {
+  id: string;
+  title: string;
+  created_at: string;
+  document_id?: string;
+  document_name?: string;
+};
 
 function ChatPage() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [sessions, setSessions] = useState<Session[]>([]);
   const [documents, setDocuments] = useState<any[]>([]);
@@ -61,7 +83,7 @@ function ChatPage() {
       if (!res.summary) {
         // If not summarized yet, trigger summarization
         toast.info("Analyzing document and generating summary...");
-        res = await api.summarize(docId, user!.id);
+        res = await api.summarize(user!.id, docId);
       }
       setSummary(res);
     } catch (e: any) {
@@ -73,7 +95,8 @@ function ChatPage() {
 
   // Initialize speech recognition
   useEffect(() => {
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const SpeechRecognition =
+      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (SpeechRecognition) {
       const recognition = new SpeechRecognition();
       recognition.continuous = false;
@@ -92,7 +115,9 @@ function ChatPage() {
     }
     return () => {
       if (recognitionRef.current) {
-        try { recognitionRef.current.stop(); } catch {}
+        try {
+          recognitionRef.current.stop();
+        } catch {}
       }
       window.speechSynthesis?.cancel();
     };
@@ -113,17 +138,20 @@ function ChatPage() {
     }
   }, [isListening]);
 
-  const speakText = useCallback((text: string) => {
-    if (!ttsEnabled || !window.speechSynthesis) return;
-    window.speechSynthesis.cancel();
-    // Strip markdown bold markers
-    const clean = text.replace(/\*\*/g, "").replace(/`/g, "");
-    const utterance = new SpeechSynthesisUtterance(clean);
-    utterance.lang = navigator.language || "en-US";
-    utterance.rate = 1.0;
-    utterance.pitch = 1.0;
-    window.speechSynthesis.speak(utterance);
-  }, [ttsEnabled]);
+  const speakText = useCallback(
+    (text: string) => {
+      if (!ttsEnabled || !window.speechSynthesis) return;
+      window.speechSynthesis.cancel();
+      // Strip markdown bold markers
+      const clean = text.replace(/\*\*/g, "").replace(/`/g, "");
+      const utterance = new SpeechSynthesisUtterance(clean);
+      utterance.lang = navigator.language || "en-US";
+      utterance.rate = 1.0;
+      utterance.pitch = 1.0;
+      window.speechSynthesis.speak(utterance);
+    },
+    [ttsEnabled],
+  );
 
   useEffect(() => {
     if (user) {
@@ -176,7 +204,8 @@ function ChatPage() {
 
   const newChat = async (docId?: string, docsList?: any[]) => {
     if (!user) return;
-    const scopeId: string | undefined = docId || (selectedDocId === "all" ? undefined : selectedDocId);
+    const scopeId: string | undefined =
+      docId || (selectedDocId === "all" ? undefined : selectedDocId);
     let scopeName: string | undefined;
     if (scopeId) {
       const activeList = docsList || documents;
@@ -208,7 +237,10 @@ function ChatPage() {
       setSessions((p) => [session, ...p]);
       setActiveId(session.id);
     }
-    setMessages((p) => [...p, { id: "u-" + Date.now(), role: "user", content: q, created_at: new Date().toISOString() }]);
+    setMessages((p) => [
+      ...p,
+      { id: "u-" + Date.now(), role: "user", content: q, created_at: new Date().toISOString() },
+    ]);
     setInput("");
     setSending(true);
     try {
@@ -232,7 +264,10 @@ function ChatPage() {
     if (!user) return;
     await api.deleteSession(id, user.id);
     setSessions((p) => p.filter((s) => s.id !== id));
-    if (activeId === id) { setActiveId(null); setMessages([]); }
+    if (activeId === id) {
+      setActiveId(null);
+      setMessages([]);
+    }
   };
 
   const startRename = (e: React.MouseEvent, s: Session) => {
@@ -242,10 +277,15 @@ function ChatPage() {
   };
 
   const commitRename = async (sessionId: string) => {
-    if (!user || !editTitle.trim()) { setEditingSessionId(null); return; }
+    if (!user || !editTitle.trim()) {
+      setEditingSessionId(null);
+      return;
+    }
     try {
       await api.renameSession(sessionId, user.id, editTitle.trim());
-      setSessions((p) => p.map((s) => s.id === sessionId ? { ...s, title: editTitle.trim() } : s));
+      setSessions((p) =>
+        p.map((s) => (s.id === sessionId ? { ...s, title: editTitle.trim() } : s)),
+      );
     } catch {
       toast.error("Failed to rename session");
     }
@@ -255,8 +295,8 @@ function ChatPage() {
   const exportChat = () => {
     if (messages.length === 0) return;
     const session = sessions.find((s) => s.id === activeId);
-    const lines = messages.map((m) =>
-      `[${m.role.toUpperCase()}] ${new Date(m.created_at).toLocaleString()}\n${m.content}`
+    const lines = messages.map(
+      (m) => `[${m.role.toUpperCase()}] ${new Date(m.created_at).toLocaleString()}\n${m.content}`,
     );
     const text = `Chat Export: ${session?.title || "Conversation"}\n${"=".repeat(60)}\n\n${lines.join("\n\n---\n\n")}`;
     const blob = new Blob([text], { type: "text/plain" });
@@ -269,14 +309,29 @@ function ChatPage() {
     toast.success("Chat exported!");
   };
 
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate({ to: "/login" });
+    }
+  }, [user, loading, navigate]);
+
+  if (loading) {
+    return (
+      <PageShell>
+        <div className="flex h-[70vh] items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1f5d4f]"></div>
+        </div>
+      </PageShell>
+    );
+  }
+
   if (!user) {
-    navigate({ to: "/login" });
     return null;
   }
 
   const activeSession = sessions.find((s) => s.id === activeId);
   const filteredSessions = sessions.filter((s) =>
-    s.title.toLowerCase().includes(searchQuery.toLowerCase())
+    s.title.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   return (
@@ -284,7 +339,9 @@ function ChatPage() {
       <section className="px-6 max-w-[1200px] mx-auto pb-20">
         <div className="flex gap-8 items-start">
           {/* Sidebar */}
-          <aside className={`${sidebarOpen ? "block" : "hidden"} lg:block w-72 shrink-0 sticky top-32 space-y-3`}>
+          <aside
+            className={`${sidebarOpen ? "block" : "hidden"} lg:block w-72 shrink-0 sticky top-32 space-y-3`}
+          >
             <button
               onClick={() => newChat()}
               className="w-full flex items-center gap-2 bg-[#051A24] text-white rounded-full px-5 py-3 text-sm font-medium hover:bg-[#0D212C] transition"
@@ -294,16 +351,22 @@ function ChatPage() {
 
             {/* Scope selector */}
             <div className="bg-white rounded-2xl border border-[#051A24]/5 p-4 space-y-2">
-              <p className="text-xs uppercase tracking-wide text-[#273C46] font-semibold">New Chat Scope</p>
+              <p className="text-xs uppercase tracking-wide text-[#273C46] font-semibold">
+                New Chat Scope
+              </p>
               <select
                 value={selectedDocId}
                 onChange={(e) => setSelectedDocId(e.target.value)}
                 className="w-full rounded-xl border border-[#051A24]/10 bg-[#f0f0ee] px-3 py-2 text-sm text-[#051A24] focus:outline-none focus:ring-2 focus:ring-[#1f5d4f]"
               >
                 <option value="all">📂 All Documents</option>
-                {documents.filter((d: any) => d.status === "done").map((doc: any) => (
-                  <option key={doc.id} value={doc.id}>📄 {doc.name}</option>
-                ))}
+                {documents
+                  .filter((d: any) => d.status === "done")
+                  .map((doc: any) => (
+                    <option key={doc.id} value={doc.id}>
+                      📄 {doc.name}
+                    </option>
+                  ))}
               </select>
             </div>
 
@@ -341,10 +404,16 @@ function ChatPage() {
                           }}
                           className="flex-1 text-sm rounded-lg border border-[#1f5d4f]/40 px-2 py-1 focus:outline-none focus:ring-1 focus:ring-[#1f5d4f]"
                         />
-                        <button onClick={() => commitRename(s.id)} className="text-[#1f5d4f] hover:text-[#1f5d4f]/80">
+                        <button
+                          onClick={() => commitRename(s.id)}
+                          className="text-[#1f5d4f] hover:text-[#1f5d4f]/80"
+                        >
                           <Check className="w-3.5 h-3.5" />
                         </button>
-                        <button onClick={() => setEditingSessionId(null)} className="text-[#273C46]/60 hover:text-[#273C46]">
+                        <button
+                          onClick={() => setEditingSessionId(null)}
+                          className="text-[#273C46]/60 hover:text-[#273C46]"
+                        >
                           <X className="w-3.5 h-3.5" />
                         </button>
                       </div>
@@ -417,7 +486,15 @@ function ChatPage() {
                         </button>
                         <button
                           type="button"
-                          onClick={() => navigate({ to: "/quiz", search: { docId: activeSession.document_id, docName: activeSession.document_name || "Document" } })}
+                          onClick={() =>
+                            navigate({
+                              to: "/quiz",
+                              search: {
+                                docId: activeSession.document_id,
+                                docName: activeSession.document_name || "Document",
+                              },
+                            })
+                          }
                           title="Generate quiz from document"
                           className="flex items-center gap-1.5 text-xs text-[#051A24] hover:bg-[#051A24]/5 shrink-0 px-2.5 py-1.5 rounded-lg border border-[#051A24]/10 transition cursor-pointer"
                         >
@@ -447,7 +524,7 @@ function ChatPage() {
                       <Sparkles className="w-4 h-4 text-[#1f5d4f] animate-pulse" />
                       <h3 className="text-sm font-semibold text-[#051A24]">Document Summary</h3>
                     </div>
-                    <button 
+                    <button
                       type="button"
                       onClick={() => setShowSummaryPanel(false)}
                       className="text-[#273C46]/60 hover:text-[#273C46] p-1 hover:bg-[#1f5d4f]/10 rounded-lg transition cursor-pointer"
@@ -458,18 +535,26 @@ function ChatPage() {
                   {loadingSummary ? (
                     <div className="flex items-center gap-3 py-2">
                       <span className="w-2.5 h-2.5 rounded-full bg-[#1f5d4f] animate-ping" />
-                      <p className="text-xs text-[#273C46]/70">Reading file chunks & summarizing...</p>
+                      <p className="text-xs text-[#273C46]/70">
+                        Reading file chunks & summarizing...
+                      </p>
                     </div>
                   ) : summary ? (
                     <div className="space-y-3 text-left">
                       <div className="bg-white rounded-xl p-3 border border-[#1f5d4f]/10">
-                        <p className="text-xs font-semibold text-[#1f5d4f] uppercase tracking-wider mb-1">TL;DR</p>
-                        <p className="text-sm text-[#051A24] leading-relaxed">{summary.tldr || summary.summary}</p>
+                        <p className="text-xs font-semibold text-[#1f5d4f] uppercase tracking-wider mb-1">
+                          TL;DR
+                        </p>
+                        <p className="text-sm text-[#051A24] leading-relaxed">
+                          {summary.tldr || summary.summary}
+                        </p>
                       </div>
-                      
+
                       {summary.key_points && summary.key_points.length > 0 && (
                         <div>
-                          <p className="text-xs font-semibold text-[#273C46]/80 uppercase tracking-wider mb-1 px-1">Key Takeaways</p>
+                          <p className="text-xs font-semibold text-[#273C46]/80 uppercase tracking-wider mb-1 px-1">
+                            Key Takeaways
+                          </p>
                           <ul className="list-disc pl-5 text-xs text-[#051A24] space-y-1">
                             {summary.key_points.map((pt: string, idx: number) => (
                               <li key={idx}>{pt}</li>
@@ -477,11 +562,14 @@ function ChatPage() {
                           </ul>
                         </div>
                       )}
-                      
+
                       {summary.topics && summary.topics.length > 0 && (
                         <div className="flex flex-wrap gap-1.5 pt-1">
                           {summary.topics.map((topic: string, idx: number) => (
-                            <span key={idx} className="text-[10px] bg-[#1f5d4f]/10 text-[#1f5d4f] rounded-full px-2 py-0.5 font-medium">
+                            <span
+                              key={idx}
+                              className="text-[10px] bg-[#1f5d4f]/10 text-[#1f5d4f] rounded-full px-2 py-0.5 font-medium"
+                            >
                               {topic}
                             </span>
                           ))}
@@ -498,17 +586,30 @@ function ChatPage() {
                   <Sparkles className="w-12 h-12 text-[#1f5d4f] mb-4" />
                   <h2 className="text-2xl font-medium text-[#051A24]">Ask anything</h2>
                   <p className="text-sm text-[#273C46] mt-2 max-w-sm">
-                    Start a new conversation or pick one from your history. Select a document scope from the sidebar to chat with a specific file.
+                    Start a new conversation or pick one from your history. Select a document scope
+                    from the sidebar to chat with a specific file.
                   </p>
                 </div>
               ) : (
                 <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 md:p-8 space-y-5">
                   {messages.map((m) => (
-                    <div key={m.id} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
-                      <div className={`max-w-[85%] rounded-3xl px-5 py-4 ${m.role === "user" ? "bg-[#051A24] text-white" : "bg-[#f0f0ee] text-[#051A24]"}`}>
-                        <p className="text-[15px] leading-relaxed whitespace-pre-wrap">{m.content}</p>
-                        <p className={`text-[10px] mt-2 ${m.role === "user" ? "text-white/40" : "text-[#273C46]/40"}`}>
-                          {new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                    <div
+                      key={m.id}
+                      className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
+                    >
+                      <div
+                        className={`max-w-[85%] rounded-3xl px-5 py-4 ${m.role === "user" ? "bg-[#051A24] text-white" : "bg-[#f0f0ee] text-[#051A24]"}`}
+                      >
+                        <p className="text-[15px] leading-relaxed whitespace-pre-wrap">
+                          {m.content}
+                        </p>
+                        <p
+                          className={`text-[10px] mt-2 ${m.role === "user" ? "text-white/40" : "text-[#273C46]/40"}`}
+                        >
+                          {new Date(m.created_at).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
                         </p>
                       </div>
                     </div>
@@ -517,9 +618,18 @@ function ChatPage() {
                     <div className="flex justify-start">
                       <div className="bg-[#f0f0ee] rounded-3xl px-5 py-4 flex items-center gap-3">
                         <div className="flex gap-1">
-                          <span className="w-1.5 h-1.5 rounded-full bg-[#1f5d4f] animate-bounce" style={{ animationDelay: "0ms" }} />
-                          <span className="w-1.5 h-1.5 rounded-full bg-[#1f5d4f] animate-bounce" style={{ animationDelay: "150ms" }} />
-                          <span className="w-1.5 h-1.5 rounded-full bg-[#1f5d4f] animate-bounce" style={{ animationDelay: "300ms" }} />
+                          <span
+                            className="w-1.5 h-1.5 rounded-full bg-[#1f5d4f] animate-bounce"
+                            style={{ animationDelay: "0ms" }}
+                          />
+                          <span
+                            className="w-1.5 h-1.5 rounded-full bg-[#1f5d4f] animate-bounce"
+                            style={{ animationDelay: "150ms" }}
+                          />
+                          <span
+                            className="w-1.5 h-1.5 rounded-full bg-[#1f5d4f] animate-bounce"
+                            style={{ animationDelay: "300ms" }}
+                          />
                         </div>
                         <p className="text-sm text-[#273C46]">Generating answer…</p>
                       </div>
@@ -530,7 +640,10 @@ function ChatPage() {
 
               {/* Input */}
               <form
-                onSubmit={(e) => { e.preventDefault(); ask(input); }}
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  ask(input);
+                }}
                 className="border-t border-[#051A24]/10 p-4 flex items-center gap-3"
               >
                 {/* Mic button */}
@@ -549,7 +662,9 @@ function ChatPage() {
                 <input
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder={isListening ? "Listening..." : "Ask anything across your indexed documents…"}
+                  placeholder={
+                    isListening ? "Listening..." : "Ask anything across your indexed documents…"
+                  }
                   disabled={sending}
                   className={`flex-1 bg-transparent outline-none text-[15px] placeholder:text-[#273C46]/50 disabled:opacity-50 ${isListening ? "placeholder:text-red-400 placeholder:animate-pulse" : ""}`}
                 />

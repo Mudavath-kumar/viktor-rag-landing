@@ -40,6 +40,15 @@ async def catch_all(request, exc):
     )
 
 
+@app.get("/")
+async def root():
+    return {"status": "ok", "service": "Viktor RAG API"}
+
+
+@app.get("/health")
+async def health():
+    return {"status": "healthy"}
+
 
 # ─── Auth ───────────────────────────────────────────────────────────────────
 
@@ -83,7 +92,9 @@ async def login(req: LoginRequest):
 
 def background_process_file(doc_id: str, file_bytes: bytes, name: str, user_id: str):
     try:
-        with tempfile.NamedTemporaryFile(delete=False, suffix=name) as tmp:
+        # Extract proper file extension for the temp file
+        ext = name.rsplit(".", 1)[-1] if "." in name else "tmp"
+        with tempfile.NamedTemporaryFile(delete=False, suffix=f".{ext}") as tmp:
             tmp.write(file_bytes)
             tmp_path = tmp.name
         text = extract_text(tmp_path)

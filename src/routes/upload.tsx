@@ -53,7 +53,7 @@ const formats = [
 ];
 
 function UploadPage() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [items, setItems] = useState<Item[]>([]);
   const [drag, setDrag] = useState(false);
@@ -94,7 +94,7 @@ function UploadPage() {
         status: d.status,
         tags: d.tags,
         category: d.category,
-      }))
+      })),
     );
   };
 
@@ -116,17 +116,11 @@ function UploadPage() {
       try {
         const { document } = await api.upload(user.id, file);
         setItems((p) =>
-          p.map((it) =>
-            it.id === tempId ? { ...it, id: document.id, status: "processing" } : it
-          )
+          p.map((it) => (it.id === tempId ? { ...it, id: document.id, status: "processing" } : it)),
         );
         toast.success(`${file.name} uploaded successfully! Indexing in background...`);
       } catch (e: any) {
-        setItems((p) =>
-          p.map((it) =>
-            it.id === tempId ? { ...it, status: "error" } : it
-          )
-        );
+        setItems((p) => p.map((it) => (it.id === tempId ? { ...it, status: "error" } : it)));
         toast.error(e.message || `Failed: ${file.name}`);
       }
     }
@@ -162,10 +156,8 @@ function UploadPage() {
       if (result.tags) {
         setItems((p) =>
           p.map((x) =>
-            x.id === it.id
-              ? { ...x, tags: result.tags, category: result.category }
-              : x
-          )
+            x.id === it.id ? { ...x, tags: result.tags, category: result.category } : x,
+          ),
         );
       }
       toast.success("Summary generated!");
@@ -181,11 +173,7 @@ function UploadPage() {
     try {
       const result = await api.generateTags(user.id, it.id);
       setItems((p) =>
-        p.map((x) =>
-          x.id === it.id
-            ? { ...x, tags: result.tags, category: result.category }
-            : x
-        )
+        p.map((x) => (x.id === it.id ? { ...x, tags: result.tags, category: result.category } : x)),
       );
       toast.success("Tags generated!");
     } catch (e: any) {
@@ -198,8 +186,23 @@ function UploadPage() {
     navigate({ to: "/quiz", search: { docId: it.id, docName: it.name } });
   };
 
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate({ to: "/login" });
+    }
+  }, [user, loading, navigate]);
+
+  if (loading) {
+    return (
+      <PageShell>
+        <div className="flex h-[70vh] items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1f5d4f]"></div>
+        </div>
+      </PageShell>
+    );
+  }
+
   if (!user) {
-    navigate({ to: "/login" });
     return null;
   }
 
@@ -212,13 +215,11 @@ function UploadPage() {
           <div className="lg:col-span-7">
             <SectionEyebrow>Upload</SectionEyebrow>
             <h1 className="mt-3 text-[40px] md:text-[60px] leading-[1] tracking-tight">
-              Drop it in.{" "}
-              <span className="font-mondwest text-[#1f5d4f]">We'll read</span>{" "}
-              the rest.
+              Drop it in. <span className="font-mondwest text-[#1f5d4f]">We'll read</span> the rest.
             </h1>
             <p className="mt-6 text-[#273C46] max-w-xl">
-              Documents are parsed, chunked, embedded locally with
-              sentence-transformers, and indexed for semantic retrieval.
+              Documents are parsed, chunked, embedded locally with sentence-transformers, and
+              indexed for semantic retrieval.
             </p>
             <div
               onDragOver={(e) => {
@@ -240,13 +241,9 @@ function UploadPage() {
                 <UploadIcon className="w-10 h-10 text-[#1f5d4f] mx-auto" />
               )}
               <p className="mt-4 text-lg font-medium">
-                {uploading
-                  ? "Uploading & indexing..."
-                  : "Drop files or click to browse"}
+                {uploading ? "Uploading & indexing..." : "Drop files or click to browse"}
               </p>
-              <p className="mt-2 text-sm text-[#273C46]">
-                PDF, DOCX, TXT, MD supported
-              </p>
+              <p className="mt-2 text-sm text-[#273C46]">PDF, DOCX, TXT, MD supported</p>
               <input
                 ref={inputRef}
                 type="file"
@@ -283,9 +280,7 @@ function UploadPage() {
               </div>
               <ul className="space-y-3">
                 {items.length === 0 && (
-                  <p className="text-xs text-[#273C46]/60">
-                    No documents yet
-                  </p>
+                  <p className="text-xs text-[#273C46]/60">No documents yet</p>
                 )}
                 {items.map((it) => (
                   <li key={it.id} className="rounded-2xl border border-[#051A24]/5 overflow-hidden">
@@ -294,9 +289,7 @@ function UploadPage() {
                         {it.type}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">
-                          {it.name}
-                        </p>
+                        <p className="text-sm font-medium truncate">{it.name}</p>
                         <div className="flex items-center gap-2 mt-0.5">
                           <p className="text-xs text-[#273C46]">{it.size}</p>
                           {it.category && (
@@ -383,7 +376,9 @@ function UploadPage() {
                         {it.status === "processing" && (
                           <div className="flex items-center gap-1.5 shrink-0">
                             <Loader2 className="w-4 h-4 text-amber-600 animate-spin" />
-                            <span className="text-[10px] font-mono text-amber-600 font-medium">INDEXING</span>
+                            <span className="text-[10px] font-mono text-amber-600 font-medium">
+                              INDEXING
+                            </span>
                           </div>
                         )}
                         {it.status === "error" && (
@@ -395,9 +390,7 @@ function UploadPage() {
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
-                            <span className="text-[10px] font-mono text-red-500">
-                              ERROR
-                            </span>
+                            <span className="text-[10px] font-mono text-red-500">ERROR</span>
                           </>
                         )}
                       </div>
@@ -436,34 +429,28 @@ function UploadPage() {
                               Key Points
                             </p>
                             <ul className="space-y-1">
-                              {summaries[it.id].key_points.map(
-                                (kp: string, i: number) => (
-                                  <li
-                                    key={i}
-                                    className="text-xs text-[#051A24] flex items-start gap-2"
-                                  >
-                                    <span className="text-[#1f5d4f] mt-0.5">
-                                      •
-                                    </span>
-                                    {kp}
-                                  </li>
-                                )
-                              )}
+                              {summaries[it.id].key_points.map((kp: string, i: number) => (
+                                <li
+                                  key={i}
+                                  className="text-xs text-[#051A24] flex items-start gap-2"
+                                >
+                                  <span className="text-[#1f5d4f] mt-0.5">•</span>
+                                  {kp}
+                                </li>
+                              ))}
                             </ul>
                           </div>
                         )}
                         {summaries[it.id].topics?.length > 0 && (
                           <div className="flex flex-wrap gap-1.5">
-                            {summaries[it.id].topics.map(
-                              (t: string, i: number) => (
-                                <span
-                                  key={i}
-                                  className="text-[10px] bg-[#051A24]/8 text-[#051A24] px-2 py-0.5 rounded-full"
-                                >
-                                  {t}
-                                </span>
-                              )
-                            )}
+                            {summaries[it.id].topics.map((t: string, i: number) => (
+                              <span
+                                key={i}
+                                className="text-[10px] bg-[#051A24]/8 text-[#051A24] px-2 py-0.5 rounded-full"
+                              >
+                                {t}
+                              </span>
+                            ))}
                           </div>
                         )}
                       </div>

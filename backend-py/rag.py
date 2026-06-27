@@ -6,7 +6,7 @@ import data_store as store
 
 # Lazy-loaded singletons — loaded once on first use
 _model: Any = None
-_groq_client: Groq | None = None
+_groq_client: Optional[Groq] = None
 
 
 def get_model() -> Any:
@@ -23,7 +23,10 @@ def get_model() -> Any:
 def get_groq() -> Groq:
     global _groq_client
     if _groq_client is None:
-        _groq_client = Groq(api_key=config.GROQ_API_KEY)
+        api_key = config.GROQ_API_KEY
+        if not api_key:
+            raise ValueError("GROQ_API_KEY is not set in the environment variables. Please check your backend .env file.")
+        _groq_client = Groq(api_key=api_key)
     return _groq_client
 
 
@@ -50,6 +53,22 @@ def extract_text(file_path: str) -> str:
         from PyPDF2 import PdfReader
         reader = PdfReader(file_path)
         return "\n".join(page.extract_text() or "" for page in reader.pages)
+    if ext == "docx":
+        import zipfile
+        import xml.etree.ElementTree as ET
+        try:
+            with zipfile.ZipFile(file_path) as docx:
+                xml_content = docx.read('word/document.xml')
+                root = ET.fromstring(xml_content)
+                texts = []
+                for paragraph in root.iter('{http://schemas.openxmlformats.org/wordprocessingml/2006/main}p'):
+                    p_text = "".join(node.text for node in paragraph.iter('{http://schemas.openxmlformats.org/wordprocessingml/2006/main}t') if node.text)
+                    if p_text:
+                        texts.append(p_text)
+                return "\n".join(texts)
+        except Exception as e:
+            print(f"Error extracting DOCX text: {e}")
+            return ""
     with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
         return f.read(50000)
 

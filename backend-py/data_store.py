@@ -141,12 +141,32 @@ def update_document_status(user_id: str, doc_id: str, status: str):
 
 def delete_document(user_id: str, doc_id: str):
     docs = get_documents(user_id)
+    storage_path = None
+    for d in docs:
+        if d["id"] == doc_id:
+            storage_path = d.get("storage_path")
+            break
     docs = [d for d in docs if d["id"] != doc_id]
     save_documents(user_id, docs)
     try:
         storage_delete(f"chunks_{doc_id}.json")
     except Exception:
         pass
+    try:
+        storage_delete(f"summary_{doc_id}.json")
+    except Exception:
+        pass
+    try:
+        storage_delete(f"quiz_{doc_id}.json")
+    except Exception:
+        pass
+    if storage_path:
+        try:
+            # Delete from documents bucket
+            headers = {"apikey": _service_key, "Authorization": f"Bearer {_service_key}"}
+            _request("DELETE", f"/storage/v1/object/documents/{storage_path}", headers=headers)
+        except Exception as e:
+            print(f"Error deleting raw doc {storage_path}: {e}")
 
 
 # ─── Chat sessions ─────────────────────────────────────────────────────
@@ -238,6 +258,8 @@ def get_all_user_chunks(user_id: str) -> list:
     docs = get_documents(user_id)
     all_chunks = []
     for d in docs:
+        if d.get("status") != "done":
+            continue
         chunks = get_chunks(d["id"])
         for c in chunks:
             c["doc_id"] = d["id"]

@@ -1,4 +1,4 @@
-# Viktor RAG 🤖📄 
+# Viktor RAG 🤖📄
 
 > **AI-powered document Q&A platform** — Upload your PDFs, DOCX, and text files, then chat with them using semantic search and a free LLM.
 
@@ -13,25 +13,26 @@ Built by **Mudavath Kumar** for the Tutedude Web Dev Hackathon 1.0
 
 ## ✨ Features
 
-| Feature | Description |
-|---|---|
-| 📤 **Document Upload** | Drag & drop PDF, DOCX, TXT, MD, CSV files |
-| 🔍 **Semantic Search** | Local embeddings via `sentence-transformers` (`all-MiniLM-L6-v2`) |
-| 💬 **Scoped AI Chat** | Chat with a specific document or across all your documents |
-| 🧠 **Free LLM** | Powered by Groq's `llama-3.1-8b-instant` — ultra-fast, free tier |
-| 📌 **Source Citations** | Every AI answer cites the source file it used |
-| ✏️ **Rename Sessions** | Inline rename chat sessions with a single click |
-| 🔎 **History Search** | Filter past conversations by keyword |
-| 📥 **Export Chat** | Download any conversation as a `.txt` file |
-| 🗑️ **Delete Documents** | Remove uploaded files and their indexed chunks |
-| 👤 **Profile Page** | View account stats, manage documents, sign out |
-| 🔐 **Auth** | Email/password auth via Supabase (auto-confirmed signup) |
+| Feature                 | Description                                                       |
+| ----------------------- | ----------------------------------------------------------------- |
+| 📤 **Document Upload**  | Drag & drop PDF, DOCX, TXT, MD, CSV files                         |
+| 🔍 **Semantic Search**  | Local embeddings via `sentence-transformers` (`all-MiniLM-L6-v2`) |
+| 💬 **Scoped AI Chat**   | Chat with a specific document or across all your documents        |
+| 🧠 **Free LLM**         | Powered by Groq's `llama-3.1-8b-instant` — ultra-fast, free tier  |
+| 📌 **Source Citations** | Every AI answer cites the source file it used                     |
+| ✏️ **Rename Sessions**  | Inline rename chat sessions with a single click                   |
+| 🔎 **History Search**   | Filter past conversations by keyword                              |
+| 📥 **Export Chat**      | Download any conversation as a `.txt` file                        |
+| 🗑️ **Delete Documents** | Remove uploaded files and their indexed chunks                    |
+| 👤 **Profile Page**     | View account stats, manage documents, sign out                    |
+| 🔐 **Auth**             | Email/password auth via Supabase (auto-confirmed signup)          |
 
 ---
 
 ## 🛠️ Tech Stack
 
 ### Frontend
+
 - **React 19** + TypeScript + Vite
 - **TanStack Router** (file-based routing)
 - **TailwindCSS v4** + shadcn/ui components
@@ -40,6 +41,7 @@ Built by **Mudavath Kumar** for the Tutedude Web Dev Hackathon 1.0
 - **Lucide React** (icons)
 
 ### Backend
+
 - **FastAPI** + Uvicorn (Python)
 - **sentence-transformers** — local CPU embeddings (`all-MiniLM-L6-v2`)
 - **Groq API** — free LLM (`llama-3.1-8b-instant`)
@@ -48,6 +50,7 @@ Built by **Mudavath Kumar** for the Tutedude Web Dev Hackathon 1.0
 - **PyPDF2 + python-docx** — document text extraction
 
 ### Infrastructure
+
 - **Frontend:** Vercel (free Hobby tier)
 - **Backend:** Render.com (free web service)
 - **Database/Storage:** Supabase (free tier)
@@ -59,6 +62,7 @@ Built by **Mudavath Kumar** for the Tutedude Web Dev Hackathon 1.0
 ## 🚀 Quick Start (Local Development)
 
 ### Prerequisites
+
 - Node.js 18+ and npm
 - Python 3.10+
 - A [Supabase](https://supabase.com) project
