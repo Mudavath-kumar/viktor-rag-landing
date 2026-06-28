@@ -3,7 +3,7 @@ services:
     name: viktor-rag
     runtime: python
     region: oregon
-    buildCommand: chmod +x build.sh && ./build.sh
+    buildCommand: npm install && npm run build && pip install -r backend-py/requirements.txt
     startCommand: cd backend-py && uvicorn main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /health
     envVars:
