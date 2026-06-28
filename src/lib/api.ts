@@ -1,4 +1,4 @@
-const API = import.meta.env.VITE_API_URL || "https://viktor-rag-landing-fmtd.onrender.com/api";
+const API = import.meta.env.VITE_API_URL || "/api";
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const headers: Record<string, string> = {};

@@ -1,11 +1,13 @@
 import os
 import tempfile
+from pathlib import Path
 import httpx
 import uvicorn
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, UploadFile, File, Form, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 import traceback
 
 import data_store as store
@@ -38,16 +40,6 @@ async def catch_all(request, exc):
         content={"error": str(exc)},
         headers={"Access-Control-Allow-Origin": "*"},
     )
-
-
-@app.get("/")
-async def root():
-    return {"status": "ok", "service": "Viktor RAG API"}
-
-
-@app.get("/health")
-async def health():
-    return {"status": "healthy"}
 
 
 # ─── Auth ───────────────────────────────────────────────────────────────────
@@ -262,6 +254,30 @@ async def get_insights(user_id: str):
 @app.get("/api/dashboard/{user_id}")
 async def get_dashboard(user_id: str):
     return store.get_dashboard_stats(user_id)
+
+
+# ─── Static Frontend Serving ────────────────────────────────────────────────
+
+DIST_DIR = Path(__file__).resolve().parent.parent / "dist"
+
+
+@app.get("/health")
+async def health():
+    return {"status": "healthy"}
+
+
+# SPA catch-all: any route not matched by /api/* returns index.html
+@app.get("/{full_path:path}")
+async def serve_spa(full_path: str):
+    # Try to serve the exact static file first
+    file_path = DIST_DIR / full_path
+    if full_path and file_path.is_file():
+        return FileResponse(file_path)
+    # Otherwise return index.html for client-side routing
+    index = DIST_DIR / "index.html"
+    if index.is_file():
+        return FileResponse(index)
+    return JSONResponse(status_code=404, content={"error": "Frontend not built. Run npm run build."})
 
 
 if __name__ == "__main__":

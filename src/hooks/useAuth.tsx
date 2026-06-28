@@ -36,7 +36,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signUp = async (email: string, password: string, name: string) => {
     try {
-      const apiBase = import.meta.env.VITE_API_URL || "https://viktor-rag-landing-fmtd.onrender.com/api";
+      const apiBase = import.meta.env.VITE_API_URL || "/api";
       const res = await fetch(`${apiBase}/auth/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
