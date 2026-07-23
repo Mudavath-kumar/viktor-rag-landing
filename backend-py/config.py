@@ -3,8 +3,13 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# ─── Database (Neon Postgres) ─────────────────────────────────────────────────
-DATABASE_URL = os.getenv("DATABASE_URL", "")
+_raw_db_url = os.getenv("DATABASE_URL", "")
+if _raw_db_url.startswith("postgres://"):
+    DATABASE_URL = _raw_db_url.replace("postgres://", "postgresql+asyncpg://", 1)
+elif _raw_db_url.startswith("postgresql://") and not _raw_db_url.startswith("postgresql+asyncpg://"):
+    DATABASE_URL = _raw_db_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+else:
+    DATABASE_URL = _raw_db_url
 
 # ─── Qdrant Cloud ─────────────────────────────────────────────────────────────
 QDRANT_HOST = os.getenv("QDRANT_HOST", "http://localhost")
