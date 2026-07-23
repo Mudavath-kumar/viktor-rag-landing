@@ -284,33 +284,37 @@ async def generate_answer(user_id: str, query: str, session_id: str) -> str:
         for i, c in enumerate(chunks)
     )
 
-    completion = xai.chat.completions.create(
-        model=config.XAI_MODEL,
-        temperature=config.XAI_TEMPERATURE,
-        max_tokens=config.XAI_MAX_TOKENS,
-        messages=[
-            {
-                "role": "system",
-                "content": (
-                    "You are a precise RAG assistant. Answer comprehensively based on the provided context. "
-                    "Always cite which source the information came from. "
-                    "If the context lacks information to answer, say so clearly."
-                ),
-            },
-            {"role": "user", "content": f"Context:\n\n{context}\n\nQuestion: {query}"},
-        ],
-    )
-
-    answer = completion.choices[0].message.content or "Sorry, could not generate an answer."
-
-    # Append unique source references
     unique_docs = []
     for c in chunks:
         name = c.get("doc_name", "Unknown")
         if name not in unique_docs:
             unique_docs.append(name)
 
-    if unique_docs:
+    try:
+        completion = xai.chat.completions.create(
+            model=config.XAI_MODEL,
+            temperature=config.XAI_TEMPERATURE,
+            max_tokens=config.XAI_MAX_TOKENS,
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "You are a precise RAG assistant. Answer comprehensively based on the provided context. "
+                        "Always cite which source the information came from. "
+                        "If the context lacks information to answer, say so clearly."
+                    ),
+                },
+                {"role": "user", "content": f"Context:\n\n{context}\n\nQuestion: {query}"},
+            ],
+        )
+        answer = completion.choices[0].message.content or "Sorry, could not generate an answer."
+    except Exception as e:
+        print(f"[WARN] xAI LLM error ({e}), falling back to direct context retrieval")
+        answer = "Here is what I found in your documents:\n\n" + "\n\n".join(
+            f"**From `{c['doc_name']}`:**\n{c['content']}" for c in chunks[:3]
+        )
+
+    if unique_docs and "**Sources:**" not in answer:
         answer += "\n\n**Sources:** " + ", ".join(f"`{d}`" for d in unique_docs)
 
     return answer
