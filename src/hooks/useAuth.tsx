@@ -1,9 +1,15 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import { supabase } from "@/lib/supabase";
-import type { User } from "@supabase/supabase-js";
+
+const API_BASE = (import.meta.env.VITE_API_URL as string) || "http://localhost:8000/api";
+
+type AppUser = {
+  id: string;
+  email: string;
+  name: string;
+};
 
 type AuthState = {
-  user: User | null;
+  user: AppUser | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error?: string }>;
   signUp: (email: string, password: string, name: string) => Promise<{ error?: string }>;
@@ -12,48 +18,77 @@ type AuthState = {
 
 const AuthContext = createContext<AuthState | null>(null);
 
+const TOKEN_KEY = "viktor_token";
+const USER_KEY = "viktor_user";
+
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
-    return () => subscription.unsubscribe();
+    // Restore session from localStorage on mount
+    try {
+      const storedUser = localStorage.getItem(USER_KEY);
+      const token = localStorage.getItem(TOKEN_KEY);
+      if (storedUser && token) {
+        setUser(JSON.parse(storedUser));
+      }
+    } catch {
+      // ignore parse errors
+    }
+    setLoading(false);
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    return { error: error?.message };
+    try {
+      const res = await fetch(`${API_BASE}/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (data.error) return { error: data.error };
+      const u: AppUser = {
+        id: data.user.id,
+        email: data.user.email,
+        name: data.user.name || "",
+      };
+      localStorage.setItem(TOKEN_KEY, data.token);
+      localStorage.setItem(USER_KEY, JSON.stringify(u));
+      setUser(u);
+      return {};
+    } catch (err: any) {
+      return { error: err.message || "Login failed" };
+    }
   };
 
   const signUp = async (email: string, password: string, name: string) => {
     try {
-      const apiBase = import.meta.env.VITE_API_URL || "/api";
-      const res = await fetch(`${apiBase}/auth/signup`, {
+      const res = await fetch(`${API_BASE}/auth/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password, name }),
       });
       const data = await res.json();
-      if (!res.ok || data.error) {
-        return { error: data.error || `Error ${res.status}` };
-      }
+      if (data.error) return { error: data.error };
+      // Auto-sign-in after signup
+      const u: AppUser = {
+        id: data.user.id,
+        email: data.user.email,
+        name: data.user.name || "",
+      };
+      localStorage.setItem(TOKEN_KEY, data.token);
+      localStorage.setItem(USER_KEY, JSON.stringify(u));
+      setUser(u);
       return {};
     } catch (err: any) {
-      return { error: err.message || "Failed to sign up" };
+      return { error: err.message || "Signup failed" };
     }
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(USER_KEY);
     setUser(null);
   };
 

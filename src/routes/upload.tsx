@@ -16,7 +16,7 @@ import {
   Tag,
   X,
   ChevronDown,
-  ChevronUp,
+  RefreshCw,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -65,18 +65,17 @@ function UploadPage() {
   const [taggingId, setTaggingId] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const hasProcessingRef = useRef(false);
+
+  // Load docs on mount, then poll every 3s while any doc is processing
   useEffect(() => {
     if (!user) return;
     loadDocuments();
 
-    const interval = setInterval(async () => {
-      setItems((currentItems) => {
-        const hasProcessing = currentItems.some((it) => it.status === "processing");
-        if (hasProcessing) {
-          loadDocuments();
-        }
-        return currentItems;
-      });
+    const interval = setInterval(() => {
+      if (hasProcessingRef.current) {
+        loadDocuments();
+      }
     }, 3000);
 
     return () => clearInterval(interval);
@@ -84,9 +83,9 @@ function UploadPage() {
 
   const loadDocuments = async () => {
     if (!user) return;
-    const { documents } = await api.getDocuments(user.id);
-    setItems(
-      documents.map((d: any) => ({
+    try {
+      const { documents } = await api.getDocuments(user.id);
+      const mapped = documents.map((d: any) => ({
         id: d.id,
         name: d.name,
         size: d.size,
@@ -94,8 +93,12 @@ function UploadPage() {
         status: d.status,
         tags: d.tags,
         category: d.category,
-      })),
-    );
+      }));
+      setItems(mapped);
+      hasProcessingRef.current = mapped.some((it) => it.status === "processing" || it.status === "uploading");
+    } catch (e) {
+      console.error("Failed to load documents", e);
+    }
   };
 
   const onFiles = async (files: FileList | null) => {
@@ -272,11 +275,20 @@ function UploadPage() {
                 <p className="text-xs uppercase tracking-wide text-[#273C46] font-semibold">
                   Documents
                 </p>
-                {doneCount > 0 && (
-                  <span className="text-xs text-[#1f5d4f] bg-[#1f5d4f]/10 px-2 py-0.5 rounded-full">
-                    {doneCount} indexed
-                  </span>
-                )}
+                <div className="flex items-center gap-2">
+                  {doneCount > 0 && (
+                    <span className="text-xs text-[#1f5d4f] bg-[#1f5d4f]/10 px-2 py-0.5 rounded-full">
+                      {doneCount} indexed
+                    </span>
+                  )}
+                  <button
+                    onClick={loadDocuments}
+                    title="Refresh document statuses"
+                    className="p-1 rounded-lg text-[#273C46]/60 hover:text-[#1f5d4f] hover:bg-[#1f5d4f]/10 transition"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5" />
+                  </button>
+                </div>
               </div>
               <ul className="space-y-3">
                 {items.length === 0 && (

@@ -43,8 +43,8 @@ function SignupPage() {
     if (error) {
       toast.error(error);
     } else {
-      toast.success("Account created successfully! You can now log in.");
-      navigate({ to: "/login" });
+      toast.success("Account created! Welcome to Viktor RAG.");
+      navigate({ to: "/dashboard" });
     }
   };
 

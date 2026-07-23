@@ -1,6 +1,10 @@
-import { createClient } from "@supabase/supabase-js";
-
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-export const supabase = createClient(supabaseUrl, supabaseKey);
+// Supabase client stub — auth is now handled by our FastAPI backend.
+// This file is kept as a stub to avoid breaking any remaining imports.
+export const supabase = {
+  auth: {
+    getSession: async () => ({ data: { session: null } }),
+    onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
+    signInWithPassword: async () => ({ error: null }),
+    signOut: async () => ({ error: null }),
+  },
+};

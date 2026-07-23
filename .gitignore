@@ -50,3 +50,9 @@ models/
 
 # Misc
 nul
+backend-py/uploads/
+backend-py/test_*.py
+backend-py/check_fk.py
+backend-py/fix_db_schema.py
+backend-py/inspect_db.py
+test_render_*.py

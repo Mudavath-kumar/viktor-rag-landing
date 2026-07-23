@@ -1,12 +1,11 @@
 from pydantic import BaseModel
 from typing import Optional
-from datetime import datetime
 
 
 class SignupRequest(BaseModel):
     email: str
     password: str
-    name: str
+    name: str = ""
 
 
 class LoginRequest(BaseModel):
@@ -16,15 +15,8 @@ class LoginRequest(BaseModel):
 
 class AuthResponse(BaseModel):
     user: Optional[dict] = None
-    session: Optional[dict] = None
+    token: Optional[str] = None
     error: Optional[str] = None
-
-
-class UploadRequest(BaseModel):
-    user_id: str
-    name: str
-    size: str
-    file_type: str
 
 
 class ChatRequest(BaseModel):
@@ -37,67 +29,3 @@ class CreateSessionRequest(BaseModel):
     user_id: str
     document_id: Optional[str] = None
     document_name: Optional[str] = None
-
-
-class MessageResponse(BaseModel):
-    id: str
-    role: str
-    content: str
-    created_at: str
-
-
-class SessionResponse(BaseModel):
-    id: str
-    title: str
-    created_at: str
-
-
-class DocumentResponse(BaseModel):
-    id: str
-    name: str
-    size: str
-    type: str
-    status: str
-    created_at: str
-
-
-class DashboardResponse(BaseModel):
-    documents: int
-    queries: int
-    sessions: int
-    recent_activity: list
-
-
-# ─── AI Feature Models ──────────────────────────────────────────────────
-
-class SummaryResponse(BaseModel):
-    doc_id: str
-    summary: str
-    key_points: list
-    topics: list
-    tldr: str
-
-
-class QuizQuestion(BaseModel):
-    question: str
-    options: list
-    correct: int
-    explanation: str
-
-
-class QuizResponse(BaseModel):
-    doc_id: str
-    questions: list
-
-
-class TagsResponse(BaseModel):
-    doc_id: str
-    tags: list
-    category: str
-
-
-class InsightsResponse(BaseModel):
-    key_topics: list
-    knowledge_gaps: list
-    connections: list
-    briefing: str

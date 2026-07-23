@@ -64,17 +64,23 @@ function useInViewAnimation(threshold = 0.12) {
   const ref = useRef<HTMLDivElement | null>(null);
   const [isVisible, setIsVisible] = useState(false);
   useEffect(() => {
+    // Fallback: always show after 900ms in case observer doesn't fire
+    const timer = setTimeout(() => setIsVisible(true), 900);
     const obs = new IntersectionObserver(
       ([e]) => {
         if (e.isIntersecting) {
           setIsVisible(true);
+          clearTimeout(timer);
           obs.disconnect();
         }
       },
       { threshold, rootMargin: "0px 0px -60px 0px" },
     );
     if (ref.current) obs.observe(ref.current);
-    return () => obs.disconnect();
+    return () => {
+      clearTimeout(timer);
+      obs.disconnect();
+    };
   }, [threshold]);
   return { ref, isVisible };
 }

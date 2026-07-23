@@ -3,27 +3,52 @@ services:
     name: viktor-rag
     runtime: python
     region: oregon
-    buildCommand: npm install && npm run build && pip install -r backend-py/requirements.txt
+    buildCommand: bash build.sh
     startCommand: cd backend-py && uvicorn main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /health
     envVars:
-      - key: SUPABASE_URL
-        sync: false
-      - key: SUPABASE_SERVICE_ROLE_KEY
-        sync: false
-      - key: SUPABASE_ANON_KEY
-        sync: false
+      # ─── Database ─────────────────────────────────────────────────────────────
       - key: DATABASE_URL
         sync: false
-      - key: GROQ_API_KEY
+
+      # ─── Qdrant Cloud ─────────────────────────────────────────────────────────
+      - key: QDRANT_HOST
         sync: false
-      - key: VITE_SUPABASE_URL
+      - key: QDRANT_API_KEY
         sync: false
-      - key: VITE_SUPABASE_ANON_KEY
+      - key: QDRANT_COLLECTION
+        value: viktor_documents_v2
+      - key: VECTOR_SIZE
+        value: "384"
+
+      # ─── Embedding Model ──────────────────────────────────────────────────────
+      - key: EMBED_MODEL
+        value: all-MiniLM-L6-v2
+
+      # ─── xAI / Grok ───────────────────────────────────────────────────────────
+      - key: XAI_API_KEY
         sync: false
+      - key: XAI_MODEL
+        value: grok-2-latest
+      - key: XAI_TEMPERATURE
+        value: "0.1"
+      - key: XAI_MAX_TOKENS
+        value: "1200"
+
+      # ─── Frontend ─────────────────────────────────────────────────────────────
       - key: VITE_API_URL
         value: /api
+
+      # ─── Runtime Versions ─────────────────────────────────────────────────────
       - key: NODE_VERSION
         value: "20"
       - key: PYTHON_VERSION
         value: "3.11"
+
+      # ─── Misc ─────────────────────────────────────────────────────────────────
+      - key: SECRET_KEY
+        sync: false
+      - key: UPLOAD_DIR
+        value: ./uploads
+      - key: MAX_UPLOAD_MB
+        value: "250"
