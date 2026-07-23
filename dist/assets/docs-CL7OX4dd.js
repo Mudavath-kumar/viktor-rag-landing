@@ -1,0 +1,19 @@
+import{j as e,L as i}from"./index-2Kgfwxr4.js";import{c as a,P as o,S as s,A as n}from"./site-chrome-BZYyGJ1v.js";import{Z as c}from"./zap-CeyrVgBP.js";import{L as r}from"./layers-CyJM_bU9.js";import{C as d}from"./code-MxE7fMit.js";import{S as l}from"./shield-check-BSSPUvap.js";const m=[["path",{d:"M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20",key:"k3hazp"}]],x=a("book",m);const h=[["path",{d:"M12 19h8",key:"baeox8"}],["path",{d:"m4 17 6-6-6-6",key:"1yngyt"}]],p=a("terminal",h),f=[{Icon:c,title:"Quickstart",desc:"From signup to your first cited answer in under 5 minutes.",time:"5 min"},{Icon:r,title:"Ingestion pipeline",desc:"PDF, image, code, and tabular extractors — and how to bring your own.",time:"12 min"},{Icon:d,title:"REST & SDK reference",desc:"TypeScript and Python SDKs, plus the raw HTTP API.",time:"Reference"},{Icon:p,title:"CLI",desc:"Bulk-index folders, schedule re-embedding, and tail verification logs.",time:"8 min"},{Icon:l,title:"Verification engine",desc:"Tune thresholds, surface low-confidence answers, and route to human review.",time:"10 min"},{Icon:x,title:"Architecture",desc:"How LangGraph, Qdrant, and the re-ranker fit together end-to-end.",time:"15 min"}],g=`import { Viktor } from "@viktor/sdk";
+
+const client = new Viktor({ apiKey: process.env.VIKTOR_KEY });
+
+// 1. Ingest
+await client.documents.upload({
+  path: "./contracts/q4-2026.pdf",
+  workspace: "legal",
+});
+
+// 2. Ask, with verified citations
+const { answer, citations, confidence } = await client.ask({
+  workspace: "legal",
+  query: "What changed in the indemnity clause?",
+});
+
+console.log(answer);          // grounded answer
+console.log(confidence);      // 0.94
+console.log(citations[0]);    // { doc, page, span, score }`;function v(){return e.jsx(o,{children:e.jsxs("section",{className:"px-6 max-w-[1200px] mx-auto pb-20",children:[e.jsx(s,{children:"Documentation"}),e.jsxs("h1",{className:"mt-3 text-[44px] md:text-[64px] leading-[0.95] tracking-tight max-w-3xl",children:["Build with ",e.jsx("span",{className:"font-mondwest text-[#1f5d4f]",children:"Viktor"}),".",e.jsx("br",{}),"Ship in an afternoon."]}),e.jsx("p",{className:"mt-6 text-lg text-[#273C46] max-w-2xl",children:"Short guides, copy-paste examples, and a reference you can actually search."}),e.jsx("div",{className:"mt-14 grid md:grid-cols-3 gap-4",children:f.map(t=>e.jsxs("a",{href:"#",className:"bg-white rounded-3xl p-7 border border-[#051A24]/5 hover:border-[#1f5d4f]/30 hover:-translate-y-0.5 transition group",children:[e.jsxs("div",{className:"flex items-start justify-between",children:[e.jsx(t.Icon,{className:"w-6 h-6 text-[#1f5d4f]"}),e.jsx(n,{className:"w-4 h-4 text-[#273C46] group-hover:text-[#1f5d4f] transition"})]}),e.jsx("h3",{className:"mt-8 font-medium text-lg",children:t.title}),e.jsx("p",{className:"mt-2 text-sm text-[#273C46]",children:t.desc}),e.jsx("p",{className:"mt-6 font-mono text-[10px] uppercase tracking-[0.18em] text-[#273C46]",children:t.time})]},t.title))}),e.jsxs("div",{className:"mt-16 grid md:grid-cols-5 gap-6",children:[e.jsxs("div",{className:"md:col-span-2",children:[e.jsx(s,{children:"Quickstart"}),e.jsx("h2",{className:"mt-3 text-3xl tracking-tight",children:"Three lines, one verified answer."}),e.jsx("p",{className:"mt-4 text-[#273C46]",children:"Install the SDK, point it at a document, and ask. Citations and confidence scores come standard."}),e.jsx("div",{className:"mt-6 flex gap-3",children:e.jsxs(i,{to:"/signup",className:"text-sm font-medium text-[#1f5d4f] inline-flex items-center gap-1",children:["Get an API key ",e.jsx(n,{className:"w-3.5 h-3.5"})]})})]}),e.jsx("pre",{className:"md:col-span-3 bg-[#051A24] text-[#E0EBF0] rounded-3xl p-6 text-[12px] leading-relaxed font-mono overflow-x-auto",children:e.jsx("code",{children:g})})]})]})})}export{v as component};
